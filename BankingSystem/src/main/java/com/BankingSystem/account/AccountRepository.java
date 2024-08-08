@@ -1,2 +1,8 @@
-package com.BankingSystem.account;public interface AccountRepository {
+package com.BankingSystem.account;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.UUID;
+
+public interface AccountRepository extends JpaRepository<Account, UUID> {
 }
