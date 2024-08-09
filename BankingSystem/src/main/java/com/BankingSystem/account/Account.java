@@ -29,4 +29,6 @@ public class Account {
     private AccountUser accountUser;
 
     private String password;
+
+    private double balance;
 }
