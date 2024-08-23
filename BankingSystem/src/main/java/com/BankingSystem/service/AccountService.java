@@ -1,22 +1,24 @@
 package com.BankingSystem.service;
 
 
+import com.BankingSystem.AccountOps;
 import com.BankingSystem.account.Account;
 import com.BankingSystem.account.AccountRepository;
-import com.BankingSystem.account.AccountUserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.function.BiFunction;
 
 @Service
 @RequiredArgsConstructor
 public class AccountService {
 
     private final AccountRepository accountRepo;
-    private final AccountUserRepository accountUserRepo;
+    private AccountOps accountOps;
+
 
     public List<Account> getUserAccounts(Long userId) {
         return accountRepo.findByAccountUserId(userId);
@@ -36,7 +38,9 @@ public class AccountService {
     @Transactional
     public Account deposit(UUID accountNr, double amount) {
         Account account = getAccountDetails(accountNr);
-        account.setBalance(account.getBalance() + amount);
+        BiFunction<Double, Double, Double> accountDeposit = Double ::sum;
+        double newBalance = accountDeposit.apply(account.getBalance(), amount);
+        account.setBalance(newBalance);
         return accountRepo.save(account);
     }
 
@@ -46,7 +50,9 @@ public class AccountService {
         if (account.getBalance() < amount) {
             throw new RuntimeException("Insufficient balance");
         }
-        account.setBalance(account.getBalance() - amount);
+        accountOps = (balance, cash)-> balance - cash;
+        double newBalance = accountOps.operate(account.getBalance(), amount);
+        account.setBalance(newBalance);
         return accountRepo.save(account);
     }
 }
